@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Google Sheets 연동 링크 수집기</title>
+    <title>통합 수집 웹 도구 (수정 완료)</title>
     <!-- Tailwind CSS CDN 로드 -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -14,183 +14,241 @@
 <body class="bg-gray-50 flex items-center justify-center min-h-screen p-4">
 
     <!-- 메인 애플리케이션 컨테이너 -->
-    <div class="w-full max-w-lg bg-white p-8 rounded-xl shadow-2xl border border-gray-100">
-        <h1 class="text-3xl font-extrabold text-gray-900 mb-2 text-center">
-            🔗 링크 수집 웹 도구
-        </h1>
-        <p class="text-sm text-gray-500 mb-8 text-center">
-            링크를 입력하면 카테고리 자동 분류 후 Google Sheets에 저장됩니다.
-        </p>
+    <div class="w-full max-w-2xl bg-white p-8 rounded-xl shadow-2xl border border-gray-100 grid grid-cols-1 lg:grid-cols-2 gap-8">
 
-        <!-- API 설정 경고 -->
-        <div id="settings-warning" class="bg-red-50 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded-md" role="alert">
-            <p class="font-bold">✅ 최종 수정 적용됨</p>
-            <p class="text-sm">Forms의 숨겨진 필수 토큰(dlut)까지 포함하여 최종 수정되었습니다. 이제 작동해야 합니다!</p>
-        </div>
-
-        <form id="link-form">
-            <div class="mb-4">
-                <label for="link-url" class="block text-sm font-medium text-gray-700 mb-2">링크 (URL)</label>
-                <input type="url" id="link-url" placeholder="https://www.youtube.com/..." required
-                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 transition duration-150 shadow-sm">
+        <!-- 섹션 1: 링크 수집기 (출처 필드 제거 완료) -->
+        <div class="space-y-4 border-r lg:pr-8 pr-0 lg:border-gray-200 border-none">
+            <h2 class="text-xl font-bold text-gray-800 border-l-4 border-blue-500 pl-2">🔗 링크 수집 (자동 분류)</h2>
+            
+            <!-- API 설정 경고 -->
+            <div id="settings-warning-link" class="bg-amber-50 border-l-4 border-amber-500 text-amber-700 p-3 rounded-md text-sm" role="alert">
+                <p>🚨 **LINK 설정 완료!**</p>
             </div>
 
-            <button type="submit" id="submit-button"
-                    class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition duration-300 ease-in-out shadow-md hover:shadow-lg focus:outline-none focus:ring-4 focus:ring-blue-300 flex items-center justify-center disabled:opacity-50">
-                <span id="button-text">링크 저장 및 분류</span>
-                <div id="loading-spinner" class="hidden w-5 h-5 border-2 border-t-2 border-white rounded-full animate-spin ml-2"></div>
-            </button>
-        </form>
+            <form id="link-form" class="space-y-3">
+                <div>
+                    <label for="link-url" class="block text-sm font-medium text-gray-700 mb-1">링크 (URL)</label>
+                    <input type="url" id="link-url" placeholder="https://www.youtube.com/..." required
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500">
+                </div>
+                
+                <!-- 출처 입력란 제거됨 -->
 
-        <!-- 결과 메시지 영역 -->
-        <div id="result-message" class="mt-6 p-4 rounded-lg hidden" role="status"></div>
+                <button type="submit" id="submit-button-link"
+                        class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition duration-300">
+                    <span id="button-text-link">링크 저장 및 분류</span>
+                    <div id="loading-spinner-link" class="hidden w-4 h-4 border-2 border-t-2 border-white rounded-full animate-spin ml-2 inline-block"></div>
+                </button>
+            </form>
+            <div id="result-message-link" class="p-3 rounded-lg hidden text-sm"></div>
+        </div>
+
+
+        <!-- 섹션 2: 단어/문장 수집기 (출처 필드 유지) -->
+        <div class="space-y-4">
+            <h2 class="text-xl font-bold text-gray-800 border-l-4 border-purple-500 pl-2">📚 단어/문장 수집</h2>
+            
+            <!-- API 설정 경고 -->
+            <div id="settings-warning-word" class="bg-amber-50 border-l-4 border-amber-500 text-amber-700 p-3 rounded-md text-sm" role="alert">
+                <p>🚨 **WORD 설정 완료!**</p>
+            </div>
+
+            <form id="word-form" class="space-y-3">
+                <div>
+                    <label for="word-text" class="block text-sm font-medium text-gray-700 mb-1">단어 또는 문장 입력</label>
+                    <textarea id="word-text" placeholder="오늘 배운 새로운 단어나 문장을 입력하세요." required rows="4"
+                              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-purple-500"></textarea>
+                </div>
+                
+                <div>
+                    <label for="source-word" class="block text-sm font-medium text-gray-700 mb-1">출처 (기록)</label>
+                    <input type="text" id="source-word" placeholder="책 페이지, 미디어 이름 등"
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-purple-500">
+                </div>
+
+                <button type="submit" id="submit-button-word"
+                        class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-lg transition duration-300">
+                    <span id="button-text-word">단어/문장 Sheets에 저장</span>
+                    <div id="loading-spinner-word" class="hidden w-4 h-4 border-2 border-t-2 border-white rounded-full animate-spin ml-2 inline-block"></div>
+                </button>
+            </form>
+            <div id="result-message-word" class="p-3 rounded-lg hidden text-sm"></div>
+        </div>
+
     </div>
 
     <script>
         // =======================================================================
-        // ✅ 최종 확인: dlut 필드 추가 적용 완료
+        // 🚨🚨🚨 ID 설정 완료 (사용자 입력 값 반영) 🚨🚨🚨
         // =======================================================================
-        const FORM_ID = '1FAIpQLScputjj5czPcnqrOEflF2YgSd_AXyc48H3obkDeSAZAzq5QSA'; 
-
-        const FIELD_MAP = {
-            DATE: 'entry.1500600991',     
-            LINK: 'entry.644613965',       
-            CATEGORY: 'entry.1171711441',  
-            // 🚨 최종 추가: Forms의 내부 보안 토큰을 처리하는 필드 (숨겨진 필드)
-            DLUT_TOKEN: 'dlut' 
-        }; 
-        // =======================================================================
-
-        const form = document.getElementById('link-form');
-        const urlInput = document.getElementById('link-url');
-        const resultMessage = document.getElementById('result-message');
-        const submitButton = document.getElementById('submit-button');
-        const buttonText = document.getElementById('button-text');
-        const loadingSpinner = document.getElementById('loading-spinner');
-        const settingsWarning = document.getElementById('settings-warning');
         
-        // URL을 분석하여 플랫폼 카테고리를 결정하는 함수
+        // --- 1. 링크 수집기 설정 (3개 필드: 날짜, 링크, 카테고리) ---
+        const LINK_FORM_ID = '1FAIpQLScputjj5czPcnqrOEflF2YgSd_AXyc48H3obkDeSAZAzq5QSA'; 
+        const LINK_FIELD_MAP = {
+            DATE: 'entry.1500600991',       
+            LINK: 'entry.644613965',       
+            CATEGORY: 'entry.1171711441',
+            DLUT_TOKEN: 'dlut'          
+        }; 
+
+        // --- 2. 단어/문장 수집기 설정 (3개 필드: 날짜, 단어/문장, 출처) ---
+        const WORD_FORM_ID = '1FAIpQLSeOLceiq2ssLfCYb2rKKYXyJwUX9-moPc3QdnpdiVt4-iVNYw'; 
+        const WORD_FIELD_MAP = {
+            DATE: 'entry.2021585367',       
+            WORD_SENTENCE: 'entry.711110369', 
+            SOURCE: 'entry.1350015625', 
+            DLUT_TOKEN: 'dlut'          
+        }; 
+
+        // =======================================================================
+        // (수정 끝) 아래 코드는 변경하지 마세요.
+        // =======================================================================
+        
+        // UI ELEMENTS (Link Form)
+        const formLink = document.getElementById('link-form');
+        const urlInput = document.getElementById('link-url');
+        const submitButtonLink = document.getElementById('submit-button-link');
+        const buttonTextLink = document.getElementById('button-text-link');
+        const loadingSpinnerLink = document.getElementById('loading-spinner-link');
+        const resultMessageLink = document.getElementById('result-message-link');
+        const settingsWarningLink = document.getElementById('settings-warning-link');
+
+        // UI ELEMENTS (Word Form)
+        const formWord = document.getElementById('word-form');
+        const wordTextInput = document.getElementById('word-text');
+        const sourceWordInput = document.getElementById('source-word'); 
+        const submitButtonWord = document.getElementById('submit-button-word');
+        const buttonTextWord = document.getElementById('button-text-word');
+        const loadingSpinnerWord = document.getElementById('loading-spinner-word');
+        const resultMessageWord = document.getElementById('result-message-word');
+        const settingsWarningWord = document.getElementById('settings-warning-word');
+
+
+        // Function to check configuration status
+        // ID가 'YOUR_'로 시작하지 않으면 설정 완료로 간주합니다.
+        const isLinkConfigured = !LINK_FORM_ID.includes('YOUR_') && !LINK_FIELD_MAP.DATE.includes('YOUR_');
+        const isWordConfigured = !WORD_FORM_ID.includes('YOUR_') && !WORD_FIELD_MAP.DATE.includes('YOUR_');
+
+        if (isLinkConfigured) settingsWarningLink.style.display = 'none';
+        if (isWordConfigured) settingsWarningWord.style.display = 'none';
+
+
+        // Function to get platform category (LINK Form)
         function getPlatformCategory(url) {
             try {
-                const urlObj = new URL(url);
-                const hostname = urlObj.hostname.toLowerCase();
-                const path = urlObj.pathname.toLowerCase();
-
-                if (!hostname) return '유효하지 않은 형식';
-
-                if (hostname.includes('youtube.com') || hostname.includes('youtu.be')) {
-                    return '유튜브 (YouTube)';
-                } else if (hostname.includes('twitter.com') || hostname.includes('x.com')) {
-                    return '소셜 미디어 (X/Twitter)';
-                } else if (hostname.includes('instagram.com')) {
-                    return '소셜 미디어 (Instagram)';
-                } else if (hostname.includes('facebook.com') || hostname.includes('fb.com')) {
-                    return '소셜 미디어 (Facebook)';
-                } else if (hostname.includes('naver.com') && (hostname.includes('blog') || path.includes('blog'))) {
-                    return '블로그 (네이버)';
-                } else if (hostname.includes('tistory.com') || hostname.includes('medium.com')) {
-                    return '블로그 (기타)';
-                } else if (hostname.includes('github.com') || hostname.includes('gitlab.com')) {
-                    return '코드/저장소 (Code/Repo)';
-                } else if (hostname.includes('news') || hostname.includes('daily') || hostname.includes('press') || hostname.includes('media')) {
-                    return '뉴스/언론 (News/Media)';
-                } else if (hostname.includes('reddit.com') || hostname.includes('cafe.naver.com')) {
-                    return '커뮤니티/포럼 (Community/Forum)';
-                } else {
-                    return '일반 웹사이트 (Generic Web)';
-                }
-            } catch (e) {
-                return '파싱 오류';
-            }
+                const hostname = new URL(url).hostname.toLowerCase();
+                if (hostname.includes('youtube') || hostname.includes('youtu.be')) return '유튜브 (YouTube)';
+                if (hostname.includes('twitter') || hostname.includes('x.com')) return '소셜 미디어 (X/Twitter)';
+                if (hostname.includes('instagram')) return '소셜 미디어 (Instagram)';
+                if (hostname.includes('facebook')) return '소셜 미디어 (Facebook)';
+                if (hostname.includes('naver') && hostname.includes('blog')) return '블로그 (네이버)';
+                if (hostname.includes('tistory') || hostname.includes('medium')) return '블로그 (기타)';
+                return '일반 웹사이트';
+            } catch { return '파싱 오류'; }
         }
 
-        // Google Forms를 통해 데이터를 제출하는 함수 (dlut 포함 4개 필드 전송)
-        async function submitViaForm(date, link, category) {
-            const formUrl = `https://docs.google.com/forms/d/e/${FORM_ID}/formResponse`; 
-            
+        // Generic submit function for Forms
+        async function submitViaForm(formId, fieldMap, dataArray) {
+            const formUrl = \`https://docs.google.com/forms/d/e/\${formId}/formResponse\`; 
             const formData = new FormData();
-            formData.append(FIELD_MAP.DATE, date);
-            formData.append(FIELD_MAP.LINK, link);
-            formData.append(FIELD_MAP.CATEGORY, category);
-            // dlut 필드를 빈 값으로 추가 (Forms 유효성 검사 우회 시도)
-            formData.append(FIELD_MAP.DLUT_TOKEN, ''); 
-
-            for (let attempt = 0; attempt < 4; attempt++) {
-                try {
-                    const response = await fetch(formUrl, {
-                        method: 'POST',
-                        mode: 'no-cors',
-                        body: formData
-                    });
-                    return { success: true, category };
-                    
-                } catch (error) {
-                    if (attempt === 3) {
-                        throw new Error(`Google Forms 제출 실패: ${error.message}`);
-                    }
-                    const delay = Math.pow(2, attempt) * 1000 + Math.random() * 1000;
-                    await new Promise(resolve => setTimeout(resolve, delay));
-                }
-            }
-        }
-
-        // 결과 메시지를 UI에 표시하는 함수
-        function displayMessage(isSuccess, message) {
-            resultMessage.textContent = message;
-            resultMessage.classList.remove('hidden', 'bg-red-100', 'bg-green-100', 'text-red-800', 'text-green-800');
-            if (isSuccess) {
-                resultMessage.classList.add('bg-green-100', 'text-green-800');
-                urlInput.value = ''; 
-            } else {
-                resultMessage.classList.add('bg-red-100', 'text-red-800');
-            }
-        }
-        
-        // 버튼 로딩 상태 관리 함수
-        function setButtonLoading(isLoading) {
-            submitButton.disabled = isLoading;
-            buttonText.textContent = isLoading ? '저장 중...' : '링크 저장 및 분류';
-            loadingSpinner.classList.toggle('hidden', !isLoading);
-        }
-
-        // 폼 제출 이벤트 핸들러
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault();
             
-            // 설정 확인: 이 단계에서는 이미 ID가 정확하다고 가정합니다.
-            if (FORM_ID.includes('YOUR_')) {
-                displayMessage(false, '🚨 Google Forms 설정이 완료되지 않았습니다. 코드의 FORM_ID를 수정해 주세요.');
-                return;
+            // Map data to field IDs dynamically
+            const fieldKeys = Object.keys(fieldMap).filter(k => k !== 'DLUT_TOKEN'); // Exclude dlut from data mapping
+            
+            for (let i = 0; i < fieldKeys.length; i++) {
+                // dataArray의 크기는 fieldKeys의 크기와 일치해야 합니다.
+                formData.append(fieldMap[fieldKeys[i]], dataArray[i]);
             }
-
-            const linkUrl = urlInput.value.trim();
-            if (!linkUrl.startsWith('http')) {
-                displayMessage(false, '⚠️ 유효한 URL 형식(http:// 또는 https://)으로 입력해 주세요.');
-                return;
-            }
-
-            setButtonLoading(true);
-            resultMessage.classList.add('hidden');
-
-            const current_date = new Date().toISOString().slice(0, 10).replace(/-/g, ''); 
-            const category = getPlatformCategory(linkUrl);
+            
+            // Add security token
+            formData.append(fieldMap.DLUT_TOKEN, ''); 
 
             try {
-                const result = await submitViaForm(current_date, linkUrl, category);
-                displayMessage(true, `✅ 성공! 카테고리: ${result.category} - Sheets에 저장되었습니다.`);
+                // Note: No error handling for 40x or 50x status codes in no-cors mode, only network errors
+                await fetch(formUrl, { method: 'POST', mode: 'no-cors', body: formData });
+                return { success: true };
             } catch (error) {
-                displayMessage(false, `❌ 저장 실패: Forms 설정(dlut 포함)을 다시 확인해 주세요.`);
-                console.error("Critical Save Error:", error);
-            } finally {
-                setButtonLoading(false);
+                // Network error will be caught here
+                throw new Error('전송 실패');
             }
+        }
+
+        // Function to set loading state
+        function setButtonLoading(type, loading) {
+            if (type === 'link') {
+                submitButtonLink.disabled = loading;
+                buttonTextLink.textContent = loading ? '저장 중...' : '링크 저장 및 분류';
+                loadingSpinnerLink.classList.toggle('hidden', !loading);
+            } else if (type === 'word') {
+                submitButtonWord.disabled = loading;
+                buttonTextWord.textContent = loading ? '저장 중...' : '단어/문장 Sheets에 저장';
+                loadingSpinnerWord.classList.toggle('hidden', !loading);
+            }
+        }
+
+        // Function to display results
+        function displayMessage(type, success, msg) {
+            const msgEl = type === 'link' ? resultMessageLink : resultMessageWord;
+            
+            msgEl.textContent = msg;
+            msgEl.className = success 
+                ? 'p-3 rounded-lg bg-green-100 text-green-800 text-sm mt-4' 
+                : 'p-3 rounded-lg bg-red-100 text-red-800 text-sm mt-4';
+            msgEl.classList.remove('hidden');
+        }
+
+
+        // --- Event Listeners ---
+
+        // 1. Link Form Submission
+        formLink.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!isLinkConfigured) { return displayMessage('link', false, '🚨 링크 수집기 ID를 먼저 설정해주세요!'); }
+            
+            setButtonLoading('link', true);
+            
+            const link = urlInput.value.trim();
+            const date = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+            const category = getPlatformCategory(link);
+
+            try {
+                // 데이터 배열: [날짜, 링크, 카테고리] (3개만 전송)
+                await submitViaForm(LINK_FORM_ID, LINK_FIELD_MAP, [date, link, category]);
+                displayMessage('link', true, \`✅ 저장 성공! [\${category}]\`);
+                urlInput.value = '';
+            } catch (err) {
+                displayMessage('link', false, '❌ 저장 실패 (Forms 설정을 확인하세요)');
+            }
+            setButtonLoading('link', false);
         });
 
-        // 초기 설정 경고 표시/숨김
-        const isConfigured = !FORM_ID.includes('YOUR_');
-        if (isConfigured) {
-            settingsWarning.classList.add('hidden');
-        }
+        // 2. Word Form Submission
+        formWord.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!isWordConfigured) { return displayMessage('word', false, '🚨 단어 수집기 ID를 먼저 설정해주세요!'); }
+            
+            setButtonLoading('word', true);
+            
+            const text = wordTextInput.value.trim();
+            const source = sourceWordInput.value.trim(); // Get source
+            const date = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+
+            if (!text) {
+                setButtonLoading('word', false);
+                return displayMessage('word', false, '⚠️ 단어/문장을 입력해주세요.');
+            }
+
+            try {
+                // 데이터 배열: [날짜, 단어/문장, 출처] (3개)
+                await submitViaForm(WORD_FORM_ID, WORD_FIELD_MAP, [date, text, source]);
+                displayMessage('word', true, \`✅ 저장 성공!\`);
+                wordTextInput.value = '';
+                sourceWordInput.value = ''; // Clear source
+            } catch (err) {
+                displayMessage('word', false, '❌ 저장 실패 (Forms 설정을 확인하세요)');
+            }
+            setButtonLoading('word', false);
+        });
     </script>
 </body>
 </html>
